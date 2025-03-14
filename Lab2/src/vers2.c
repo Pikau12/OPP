@@ -103,7 +103,7 @@ double computeRelativeResidualNorm(double* residualVector, double** A, double* x
     vectorSub(residualVector, b, N);
 
     double upSum = 0, downSum = 0;
-    #pragma omp  for
+    #pragma omp for
     for (int i = 0; i < N; i++) {
         upSum += residualVector[i] * residualVector[i]; 
         downSum += b[i] * b[i];
@@ -113,7 +113,7 @@ double computeRelativeResidualNorm(double* residualVector, double** A, double* x
 }
 
 void matrixMult(double* residualVector, double** A, double* x, int N) {
-    #pragma omp for
+    #pragma omp for schedule(dynamic, 10)
     for (int i = 0; i < N; i++) {
         double sum = 0;
         for (int j = 0; j < N; j++) {

@@ -4,8 +4,8 @@
 
 int main(int argc, char** argv) {
 
-    if (argc < MIN_COUNT_ARGS) {
-        fprintf(stderr, "Invalid argc: %d, must be more than 2\n", argc);
+    if (argc != MIN_COUNT_ARGS) {
+        fprintf(stderr, "Invalid argc: %d, must be 3\n", argc);
         return 1;
     }
     int countThreads = atoi(argv[2]);
@@ -60,7 +60,7 @@ void solveBySimpleIteration(char** argv) {
 
 double** allocateMatrix(int N) {
     double** matrix = (double**)malloc(sizeof(double*) * N);
-    #pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; i++) {
         matrix[i] = (double*)malloc(sizeof(double) * N);
     }
@@ -68,7 +68,7 @@ double** allocateMatrix(int N) {
 }
 
 void initializeMatrix(double** matrix, int N) {
-    #pragma omp parallel for collapse(2) schedule(auto)
+    #pragma omp parallel for collapse(2) schedule(static)
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
             if (i == j) {
@@ -85,14 +85,14 @@ void initializeBRandomVector(double** A, double* b, double* u, int N) {
 }
 
 void initializeZeroVector(double* x, int N) {
-    #pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; i++) {
         x[i] = 0;
     }
 }
 
 void initializeSolutionVector(double* u, int N) {
-    #pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; i++) {
         u[i] = sin(2 * M_PI * i / N);
     }
@@ -103,7 +103,7 @@ double computeRelativeResidualNorm(double* residualVector, double** A, double* x
     vectorSub(residualVector, b, N);
 
     double upSum = 0, downSum = 0;
-    #pragma omp parallel for reduction(+:upSum, downSum) schedule(auto)
+    #pragma omp parallel for reduction(+:upSum, downSum) schedule(static)
     for (int i = 0; i < N; i++) {
         upSum += residualVector[i] * residualVector[i]; 
         downSum += b[i] * b[i];
@@ -113,7 +113,7 @@ double computeRelativeResidualNorm(double* residualVector, double** A, double* x
 }
 
 void matrixMult(double* residualVector, double** A, double* x, int N) {
-    #pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; i++) {
         double sum = 0;
         for (int j = 0; j < N; j++) {
@@ -124,7 +124,7 @@ void matrixMult(double* residualVector, double** A, double* x, int N) {
 }
 
 void vectorSub(double* residualVector, double* b, int N) {
-    #pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; i++) {
         residualVector[i] -= b[i];
     }
@@ -132,7 +132,7 @@ void vectorSub(double* residualVector, double* b, int N) {
 
 double calculateTAY(double** A, int N) {
     double maxSum = 0;
-    #pragma omp parallel for reduction(max:maxSum) schedule(auto)
+    #pragma omp parallel for reduction(max:maxSum) schedule(static) // reduction тут не нужен
     for (int i = 0; i < N; i++) {
         double rowSum = 0;
         for (int j = 0; j < N; j++) {
@@ -146,7 +146,7 @@ double calculateTAY(double** A, int N) {
 }
 
 void scalarMult(double* residualVector, double scalar, int N) {
-    #pragma omp parallel for schedule(auto)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < N; i++) {
         residualVector[i] *= scalar;
     }
