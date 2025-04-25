@@ -142,7 +142,7 @@ double calculateTAY(double** A, int N) {
             maxSum = rowSum;
         }
     }
-    return 1.0 / maxSum; 
+    return 1.0 / maxSum;
 }
 
 void scalarMult(double* residualVector, double scalar, int N) {
