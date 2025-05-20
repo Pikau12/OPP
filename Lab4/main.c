@@ -17,9 +17,9 @@
 #define X0 -1
 #define Y0 -1
 #define Z0 -1
-#define Nx 320
-#define Ny 320
-#define Nz 320
+#define Nx 400
+#define Ny 400
+#define Nz 400
 
 const double hx = (double)DX / (Nx - 1.0);
 const double hy = (double)DY / (Ny - 1.0);
@@ -262,7 +262,11 @@ int main(int argc, char** argv) {
         CalculateEdges(&matrices, rank, &flag, size);
 
         bool globalFlag;
-        MPI_Iallreduce(&flag, &globalFlag, 1, MPI_CHAR, MPI_LAND, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Request allreduceRequest;
+        MPI_Iallreduce(&flag, &globalFlag, 1, MPI_CHAR, MPI_LAND, MPI_COMM_WORLD, &allreduceRequest);
+
+        MPI_Wait(&allreduceRequest, MPI_STATUS_IGNORE);
+
         flag = globalFlag;
         counter++;
     }
